@@ -6,7 +6,7 @@
     },
     {
       "name": "@types/node",
-      "version": "^10.17.0",
+      "version": "^14.17.0",
       "type": "build"
     },
     {
@@ -75,6 +75,31 @@
     },
     {
       "name": "@aws-cdk/assert",
+      "version": "^1.95.2",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-cdk/aws-cloudfront-origins",
+      "version": "^1.95.2",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-cdk/aws-cloudfront",
+      "version": "^1.95.2",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-cdk/aws-lambda",
+      "version": "^1.95.2",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-cdk/aws-s3-deployment",
+      "version": "^1.95.2",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-cdk/aws-s3",
       "version": "^1.95.2",
       "type": "runtime"
     },
