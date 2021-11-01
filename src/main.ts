@@ -9,11 +9,15 @@ import {
   S3Origin,
 } from '@aws-cdk/aws-cloudfront-origins';
 import {
+  Policy, PolicyStatement,
+} from '@aws-cdk/aws-iam';
+import {
   Function,
   InlineCode,
   Runtime,
   Version,
 } from '@aws-cdk/aws-lambda';
+import { NodejsFunction } from '@aws-cdk/aws-lambda-nodejs';
 import {
   Bucket,
 } from '@aws-cdk/aws-s3';
@@ -25,9 +29,12 @@ import {
   App,
   CfnOutput,
   Construct,
+  CustomResource,
   Stack,
   StackProps,
 } from '@aws-cdk/core';
+
+process.env.LAMBDA_ASSETS_PATH = path.resolve(__dirname, '..', 'lambda-assets');
 export class XFrameTestStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps = {}) {
     super(scope, id, props);
@@ -94,10 +101,7 @@ export class XFrameTestStack extends Stack {
     });
     const proxyDistribution = new Distribution(this, 'ProxyDistribution', {
       defaultBehavior: {
-        // origin: new HttpOrigin(websiteDistribution.distributionDomainName, {
-        //   originPath: '/',
-        // }),
-        origin: new HttpOrigin('test-origin.miap.live', {
+        origin: new HttpOrigin(websiteDistribution.domainName, {
           originPath: '/',
         }),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -117,13 +121,32 @@ export class XFrameTestStack extends Stack {
     });
     // Create PWA
     const pwaBucket = new Bucket(this, 'PwaBucket');
-    new BucketDeployment(this, 'PwaDeployment', {
-      destinationBucket: pwaBucket,
-      sources: [
-        Source.asset(
-          path.resolve(__dirname, '..', 'pwa'),
-        ),
-      ],
+    const pwaDepolymentFunction = new NodejsFunction(this, 'PwaDeploymentFunction', {
+      entry: `${process.env.LAMBDA_ASSETS_PATH}/pwa-deployment/app.ts`,
+    });
+    pwaDepolymentFunction.role?.attachInlinePolicy(
+      new Policy(this, 'PwaDeploymentPolicy', {
+        policyName: 'PwaDeploymentPolicy',
+        statements: [
+          new PolicyStatement({
+            actions: [
+              's3:PutObject',
+            ],
+            resources: [
+              `${pwaBucket.bucketArn}/*`,
+            ],
+          }),
+        ],
+      }),
+    );
+    new CustomResource(this, 'PwaDeployment', {
+      serviceToken: pwaDepolymentFunction.functionArn,
+      properties: {
+        bucketName: pwaBucket.bucketName,
+        proxyUrl: proxyDistribution.domainName,
+        originUrl: websiteDistribution.domainName,
+        update: Date.now(),
+      },
     });
     const pwaDistribution = new Distribution(this, 'PwaDistribution', {
       defaultBehavior: {
@@ -150,6 +173,5 @@ const devEnv = {
 const app = new App();
 
 new XFrameTestStack(app, 'pwa-iframe-test', { env: devEnv });
-// new XFrameTestStack(app, 'my-stack-prod', { env: prodEnv });
 
 app.synth();

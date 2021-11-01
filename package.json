@@ -40,10 +40,14 @@
     "@aws-cdk/assert": "^1.95.2",
     "@aws-cdk/aws-cloudfront": "^1.95.2",
     "@aws-cdk/aws-cloudfront-origins": "^1.95.2",
+    "@aws-cdk/aws-iam": "^1.95.2",
     "@aws-cdk/aws-lambda": "^1.95.2",
+    "@aws-cdk/aws-lambda-nodejs": "^1.95.2",
     "@aws-cdk/aws-s3": "^1.95.2",
     "@aws-cdk/aws-s3-deployment": "^1.95.2",
-    "@aws-cdk/core": "^1.95.2"
+    "@aws-cdk/core": "^1.95.2",
+    "@softchef/lambda-events": "^1.0.79",
+    "aws-sdk": "^2.1018.0"
   },
   "bundledDependencies": [],
   "license": "Apache-2.0",

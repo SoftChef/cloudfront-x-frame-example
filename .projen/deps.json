@@ -89,6 +89,16 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-cdk/aws-iam",
+      "version": "^1.95.2",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-cdk/aws-lambda-nodejs",
+      "version": "^1.95.2",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-cdk/aws-lambda",
       "version": "^1.95.2",
       "type": "runtime"
@@ -106,6 +116,14 @@
     {
       "name": "@aws-cdk/core",
       "version": "^1.95.2",
+      "type": "runtime"
+    },
+    {
+      "name": "@softchef/lambda-events",
+      "type": "runtime"
+    },
+    {
+      "name": "aws-sdk",
       "type": "runtime"
     }
   ],
