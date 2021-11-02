@@ -11,6 +11,8 @@ export async function handler(event: Object): Promise<any> {
     const bucketName = request.property('bucketName');
     const originUrl = request.property('originUrl');
     const proxyUrl = request.property('proxyUrl');
+    const acerOriginUrl = request.property('acerOriginUrl');
+    const acerRemoveHeadersUrl = request.property('acerRemoveHeadersUrl');
     await s3.putObject({
       Bucket: bucketName,
       Key: 'index.html',
@@ -24,6 +26,10 @@ export async function handler(event: Object): Promise<any> {
     <p>The origin URL is added x-frame-options header, it's embed content failed.</p>
     <h4>Iframe from Origin URL https://${originUrl}</h4>
     <iframe src="https://${originUrl}" width="100%" height="250"></iframe>
+    <h4>Iframe from Acer Origin CloudFront URL https://${acerOriginUrl}</h4>
+    <iframe src="https://${acerOriginUrl}" width="100%" height="250"></iframe>
+    <h4>Iframe from Acer Remove Headers URL https://${acerRemoveHeadersUrl}</h4>
+    <iframe src="https://${acerRemoveHeadersUrl}" width="100%" height="250"></iframe>
   </body>
 </html>`,
     }).promise();
