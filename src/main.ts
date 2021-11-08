@@ -92,8 +92,8 @@ export class XFrameTestStack extends Stack {
     new CfnOutput(this, 'Acer-Origin-CloudFront-URL', {
       value: acerOriginDistribution.distributionDomainName,
     });
-    // Display CloudFront URL, origin is "www.acer.com", but remove x-frame-options & redirect-origin headers
-    new CfnOutput(this, 'Acer-Remove-Headers-CloudFront-URL', {
+    // Display CloudFront URL, origin is "www.acer.com", but add Content-Security-Policy headers
+    new CfnOutput(this, 'Acer-Add-Headers-CloudFront-URL', {
       value: acerAddHeadersDistribution.distributionDomainName,
     });
     // Create website bucket and upload html source code
@@ -199,7 +199,7 @@ export class XFrameTestStack extends Stack {
         }\
       '),
     });
-    // Create Proxy CloudFront and through Lambda@Edge to remove x-frame-options header
+    // Create Proxy CloudFront and through Lambda@Edge to add Content-Security-Policy header
     const proxyDistribution = new Distribution(this, 'ProxyDistribution', {
       defaultBehavior: {
         origin: new HttpOrigin(websiteDistribution.domainName, {
