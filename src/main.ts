@@ -190,7 +190,13 @@ export class XFrameTestStack extends Stack {
           const response = event.Records[0].cf.response;\n\
           const headers = response.headers;\n\
           console.log(JSON.stringify(response));\n\
-          delete headers[\'x-frame-options\'];\n\
+          response.headers[\'content-security-policy\'] = [\n\
+            {\n\
+              key: \'Content-Security-Policy\',\n\
+              value: \'frame-ancestors d5huhy1vb0h95.cloudfront.net\'\n\
+            }\n\
+          ];\n\
+          // delete headers[\'x-frame-options\'];\n\
           console.log(JSON.stringify(response));\n\
           return response;\n\
         }\
@@ -219,7 +225,7 @@ export class XFrameTestStack extends Stack {
         ],
       },
       enableLogging: true,
-      comment: 'Origin from website + remove x-frame-options header',
+      comment: 'Origin from website + add "Content-Security-Policy" header',
     });
     // Display CloudFront Proxy URL
     new CfnOutput(this, 'Proxy-URL', {
@@ -266,6 +272,6 @@ const devEnv = {
 
 const app = new App();
 
-new XFrameTestStack(app, 'pwa-iframe-t1', { env: devEnv });
+new XFrameTestStack(app, 'pwa-iframe-t2', { env: devEnv });
 
 app.synth();
