@@ -39,7 +39,7 @@ export class XFrameTestStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps = {}) {
     super(scope, id, props);
     // Create www.acer.com Lambda@Edge
-    // Remove x-frame-options & redirect-origin headers on ORIGIN_RESPONSE
+    // Add Content-Security-Policy headers on ORIGIN_RESPONSE
     const acerOriginResponseEdgeFunction = new Function(this, 'AcerOriginResponseEdgeFunction', {
       runtime: Runtime.NODEJS_14_X,
       handler: 'index.handler',
@@ -47,17 +47,19 @@ export class XFrameTestStack extends Stack {
         exports.handler = async(event) => {\n\
           const response = event.Records[0].cf.response;\n\
           const headers = response.headers;\n\
-          console.log(JSON.stringify(response));\n\
-          delete headers[\'x-frame-options\'];\n\
-          delete headers[\'redirect-origin\'];\n\
-          console.log(JSON.stringify(response));\n\
+          response.headers[\'content-security-policy\'] = [\n\
+            {\n\
+              key: \'Content-Security-Policy\',\n\
+              value: \'frame-ancestors d5huhy1vb0h95.cloudfront.net\'\n\
+            }\n\
+          ];\n\
           return response;\n\
         }\
       '),
     });
     // Create CloudFront distribution with "www.acer.com" become origin
-    // and remove x-frame-options & redirect-origin headers
-    const acerRemoveHeadersDistribution = new Distribution(this, 'AcerRemoveHeadersDistribution', {
+    // and add Content-Security-Policy headers
+    const acerAddHeadersDistribution = new Distribution(this, 'AcerAddHeadersDistribution', {
       defaultBehavior: {
         origin: new HttpOrigin('www.acer.com', {
           originPath: '/',
@@ -73,7 +75,7 @@ export class XFrameTestStack extends Stack {
         ],
       },
       enableLogging: true,
-      comment: 'acer.com + remove headers',
+      comment: 'acer.com + add headers',
     });
     // Create CloudFront distribution with "www.acer.com" become origin
     const acerOriginDistribution = new Distribution(this, 'AcerOriginDistribution', {
@@ -92,7 +94,7 @@ export class XFrameTestStack extends Stack {
     });
     // Display CloudFront URL, origin is "www.acer.com", but remove x-frame-options & redirect-origin headers
     new CfnOutput(this, 'Acer-Remove-Headers-CloudFront-URL', {
-      value: acerRemoveHeadersDistribution.distributionDomainName,
+      value: acerAddHeadersDistribution.distributionDomainName,
     });
     // Create website bucket and upload html source code
     const websiteBucket = new Bucket(this, 'WebsiteBucket');
@@ -117,7 +119,6 @@ export class XFrameTestStack extends Stack {
           key: \'X-Frame-Options\',\n\
           value: \'SAMEORIGIN\'\n\
         }];\n\
-        console.log(response);\n\
         return response;\n\
       }'),
     });
@@ -171,7 +172,6 @@ export class XFrameTestStack extends Stack {
         exports.handler = async(event, context, callback) => {\n\
           const request = event.Records[0].cf.request;\n\
           const headers = request.headers;\n\
-          console.log(JSON.stringify(event));\n\
           //if (headers.referer[0].value === \'https://xxx.cloudfront.net/\') {\n\
           //  callback(null, request)\n\
           //} else {\n\
@@ -181,7 +181,7 @@ export class XFrameTestStack extends Stack {
         }\
       '),
     });
-    // Create Proxy CloudFront "Origin-Response" Lambda@Edge to remove x-frame-options header
+    // Create Proxy CloudFront "Origin-Response" Lambda@Edge to add Content-Security-Policy header
     const proxyOriginResponseEdgeFunction = new Function(this, 'ProxyOriginResponseEdgeFunction', {
       runtime: Runtime.NODEJS_14_X,
       handler: 'index.handler',
@@ -189,15 +189,12 @@ export class XFrameTestStack extends Stack {
         exports.handler = async(event) => {\n\
           const response = event.Records[0].cf.response;\n\
           const headers = response.headers;\n\
-          console.log(JSON.stringify(response));\n\
           response.headers[\'content-security-policy\'] = [\n\
             {\n\
               key: \'Content-Security-Policy\',\n\
               value: \'frame-ancestors d5huhy1vb0h95.cloudfront.net\'\n\
             }\n\
           ];\n\
-          // delete headers[\'x-frame-options\'];\n\
-          console.log(JSON.stringify(response));\n\
           return response;\n\
         }\
       '),
@@ -257,7 +254,7 @@ export class XFrameTestStack extends Stack {
         proxyUrl: proxyDistribution.domainName,
         originUrl: websiteDistribution.domainName,
         acerOriginUrl: acerOriginDistribution.distributionDomainName,
-        acerRemoveHeadersUrl: acerRemoveHeadersDistribution.distributionDomainName,
+        acerAddHeadersUrl: acerAddHeadersDistribution.distributionDomainName,
         update: Date.now(),
       },
     });

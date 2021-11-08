@@ -12,7 +12,7 @@ export async function handler(event: Object): Promise<any> {
     const originUrl = request.property('originUrl');
     const proxyUrl = request.property('proxyUrl');
     const acerOriginUrl = request.property('acerOriginUrl');
-    const acerRemoveHeadersUrl = request.property('acerRemoveHeadersUrl');
+    const acerAddHeadersUrl = request.property('acerAddHeadersUrl');
     await s3.putObject({
       Bucket: bucketName,
       Key: 'index.html',
@@ -28,8 +28,8 @@ export async function handler(event: Object): Promise<any> {
     <iframe src="https://${originUrl}" width="100%" height="250"></iframe>
     <h4>Iframe from Acer Origin CloudFront URL https://${acerOriginUrl}</h4>
     <iframe src="https://${acerOriginUrl}" width="100%" height="250"></iframe>
-    <h4>Iframe from Acer Remove Headers URL https://${acerRemoveHeadersUrl}</h4>
-    <iframe src="https://${acerRemoveHeadersUrl}" width="100%" height="250"></iframe>
+    <h4>Iframe from Acer Add Headers URL https://${acerAddHeadersUrl}</h4>
+    <iframe src="https://${acerAddHeadersUrl}" width="100%" height="250"></iframe>
   </body>
 </html>`,
     }).promise();
